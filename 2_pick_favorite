@@ -1,21 +1,21 @@
-#!/bin/zsh
+#!/bin/bash
 # This script solves the 'Pick your favorite'
 # bash script challenge
 
 echo -en "Which would you choose [pizza hamburger cake]:"
 read choice  # Read user input
 
-case $choice in
-	pizza)
-		echo "\e[1;33mYum, great choice\e[m"
+case "$choice" in
+	"pizza")
+		echo -e "\e[1;33mYum, great choice\e[m"
 		;;
-	hamburger)
-		echo "\e[1;34mAwesome. It comes with fries\e[m"
+	"hamburger")
+		echo -e "\e[1;34mAwesome. It comes with fries\e[m"
 		;;
-	cake)
+	"cake")
 		echo "What kind of cake?"
 		read cake
-		echo "\e[1;31mGreat,enjoy your \e[1;32m$cake \e[1;31mcake\e[m"
+		echo -e "\e[1;31mGreat,enjoy your \e[1;32m$cake \e[1;31mcake\e[m"
 		;;
 	*)
 		echo "Sorry, $choice is not on the list.Pick pizza, hamburger or cake"
