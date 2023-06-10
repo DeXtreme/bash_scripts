@@ -3,7 +3,11 @@
 # bash script challenge. It takes a list of 
 # directories and lists their files
 
+lists="" # Store all results
+
 function usage(){
+	# Print usage info
+	
 	echo "$0 [[-a path] [-d path] ...] path"
 	echo "List all file in the given directory"
 	echo "	Options:"
@@ -18,54 +22,58 @@ function usage(){
 }
 
 function list_files(){
-	list=""
-	if [[ -d $1 ]]; then
-		list="\e[1;30mListing files in $1\e[m"
+	# List files in directory and concatenate results
+	results=""
+	if [[ -d $1 ]]; then # Check if path is valid directory
+		results="\e[1;30mListing files in $1\e[m"
 		case $2 in
-			"d")
-				list="${list}\n$(ls --sort -r $1)\n"
+			"d") # List files in descending order
+				results="${results}\n$(ls -r $1)\n"
 				;;
-			"a")
-				list="${list}\n$(ls --sort $1)\n"
+			"a") # List files in ascending order
+				results="${results}\n$(ls $1)\n"
 				;;
-			*)
+			*) # List newest files first
 
-				list="${list}\n$(ls $1)\n"
+				results="${results}\n$(ls -t $1)\n"
 				;;
 		esac
-		lists="${lists}\n${list}"
+		lists="${lists}\n${results}" # Concatenate results
 		return 0
 	else
 		usage "Invalid path"
 	fi
 }
 
-lists=""
 
-while getopts ":a:d:h" opts;do
-	case $opts in
-		"a")
-			list_files $OPTARG a
-			;;
-		"d")
-			list_files $OPTARG d
-			;;
-		"h")
-			usage
-			;;
-		*)
-			usage "Invalid option" 
-			;;
-	esac
-done
+function main(){
+	while getopts ":a:d:h" opts;do # Check options
+		case $opts in
+			"a")
+				list_files "$OPTARG" a
+				;;
+			"d")
+				list_files "$OPTARG" d
+				;;
+			"h")
+				usage
+				;;
+			*)
+				usage "Invalid option" 
+				;;
+		esac
+	done
+	
+	for path in ${@:$OPTIND}; do # Positonal arguments
+		list_files "$path"
+	done
 
-for path in $@; do
-	list_files "$path"
-done
+	if [[ -n "$lists" ]]; then
+		echo -e "$lists"
+	else
+		usage
+	fi
+}
 
-if [[ -n "$lists" ]]; then
-	echo -e "$lists"
-else
-	usage
-fi
 
+main $@
