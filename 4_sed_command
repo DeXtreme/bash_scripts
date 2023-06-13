@@ -1,0 +1,75 @@
+#!/bin/bash
+# The script solves the 'SED commands' bash
+# script challenge. It lists the files in the 
+# user's home directory and replaces the owner
+# with the reverse of the user's name
+
+
+reversed=""
+
+function usage(){
+	# Print usage message and any error messages
+
+	echo "$0 [-n NUM]"
+	echo ""
+	echo "	Options:"
+	echo "		-n	NUM	Change only the first n lines of text"
+	echo "		-h		Prints this message"
+	echo ""
+	echo $1
+
+	exit 0
+}
+
+function reverse(){
+	# Reverse strings
+
+	for ((i=$((${#1}-1));i>=0;i--)); do
+		reversed="${reversed}${1:$i:1}"
+	done
+
+	return 0
+}
+
+
+function list_replace(){
+	# List files in the home directory and
+	# replace owner in the lines of text
+ 	
+	if [[ "$1" =~ ^[0-9]+$ ]]; then # If $1 is a number, replace first n lines
+		n=$(($1+1))
+	else
+		usage "NUM must be a number"
+	fi
+
+	name=$(whoami)
+	reverse "$name"
+
+	echo -e "$(ls -l ~|sed "1,$n s/$name/$reversed/g")"
+
+	return 0
+}
+
+
+function main(){
+	while getopts ":n:h" opts; do
+		case $opts in
+			"n")
+				num=$OPTARG
+				;;
+			"h")
+				usage
+				;;
+			*)
+				usage "Invalid option"
+				;;
+		esac
+	done
+
+	list_replace "$num"
+
+	return 0
+}
+
+
+main $@
