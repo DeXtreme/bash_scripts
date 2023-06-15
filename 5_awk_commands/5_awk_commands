@@ -1,0 +1,75 @@
+#!/bin/bash
+# This script solves the 'AWK Commands'
+# bash scripting challenge. It lists the
+# countries and capitals from the country-list.csv file
+
+alpha=0
+
+function usage(){
+	# Print help message 
+	
+	echo "$0 [-a] [prefix]"
+	echo "Options:"
+	echo "	-a		Sort list by captial alphabetically"
+	echo "	prefix		List countries starting with prefix"
+	
+	exit 0
+}
+
+
+function list(){
+	# List countries and capitals
+	
+	if [[ -f "./country-list.csv" ]]; then # Check if country-list.csv exists
+		if [[ -n "$1" ]]; then # Check if a prefix was give
+			# Get countries that start with prefix and their captials
+			results="$(awk "BEGIN {IGNORECASE=1;OFS=\",\";FS=\",\"} NR>1 && \$1~/^\"$1/ {print \$1,\$2}" ./country-list.csv)"
+		else	
+			# Get all countries and their capitals
+			results="$(awk "BEGIN {OFS=\",\";FS=\",\"}NR>1 {print \$1,\$2}" ./country-list.csv)"
+		fi
+
+	
+		if [[ alpha -gt 0 ]]; then # Check if alpha flag was set
+			# Print capital before country, sort and format into columns
+			results="$(echo "$results"|awk -F, 'BEGIN {OFS=","} {print $2,$1}'|sort|column -ts , -N Capital,Country -O Country,Capital)"
+		else	
+			# Format results as columns
+			results="$(echo "$results"|column -ts , -N Country,Capital)"
+		fi
+
+		echo -e "$results"
+	else
+		echo "$(basename $0): ./country-list.csv not found"
+		exit 1
+	fi
+		
+      	exit 0	
+}
+
+
+
+function main(){
+	# Main function
+	while getopts ":ah" opts; do
+		case $opts in
+			"a")
+				alpha=1
+				;;
+			"h")
+				usage
+				;;
+			*)	
+				echo "$(basename $0): invalid option -- $opts"
+				echo "Try '$0 -h' for more information"
+				exit 1
+				;;
+		esac
+	done
+
+	list "${@:$OPTIND}"
+}
+
+
+
+main $@
